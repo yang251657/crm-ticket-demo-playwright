@@ -41,7 +41,6 @@ jobs:
         run: |
           pytest tests \
             --browser chromium \
-            --headed=false \
             --tracing retain-on-failure \
             --screenshot only-on-failure \
             --alluredir=allure-results \
