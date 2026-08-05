@@ -1,0 +1,279 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CRM 工单系统 Demo</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <section id="login-view" class="login-shell">
+      <div class="login-card">
+        <div class="brand">
+          <div class="brand-mark">C</div>
+          <div>
+            <h1>CRM 工单系统</h1>
+            <p>Playwright 自动化实操 Demo</p>
+          </div>
+        </div>
+
+        <label for="username">用户名</label>
+        <input id="username" name="username" aria-label="用户名" placeholder="agent">
+
+        <label for="password">密码</label>
+        <input id="password" name="password" aria-label="密码" type="password" placeholder="Password123">
+
+        <button id="login-button" type="button">登录</button>
+        <p id="login-message" role="status" aria-live="polite"></p>
+
+        <div class="demo-hint">
+          Demo 账号：agent / Password123
+        </div>
+      </div>
+    </section>
+
+    <section id="main-view" class="hidden">
+      <header class="topbar">
+        <div>
+          <h1>CRM 工作台</h1>
+          <p id="welcome-text">欢迎</p>
+        </div>
+        <button id="logout-button" class="secondary" type="button">退出登录</button>
+      </header>
+
+      <div class="layout">
+        <aside class="sidebar">
+          <button class="nav-item active" data-module="dashboard" type="button">首页</button>
+          <button class="nav-item" data-module="orders" type="button">订单模块</button>
+          <button class="nav-item" data-module="tickets" type="button">工单模块</button>
+        </aside>
+
+        <main class="content">
+          <section id="dashboard-module" class="module">
+            <div class="page-heading">
+              <div>
+                <h2>首页</h2>
+                <p>查看订单与工单概况</p>
+              </div>
+            </div>
+
+            <div class="metrics">
+              <article class="metric-card">
+                <span>订单总数</span>
+                <strong id="order-count">3</strong>
+              </article>
+              <article class="metric-card">
+                <span>工单总数</span>
+                <strong id="ticket-count">4</strong>
+              </article>
+              <article class="metric-card">
+                <span>处理中工单</span>
+                <strong id="processing-count">2</strong>
+              </article>
+              <article class="metric-card">
+                <span>待处理工单</span>
+                <strong id="pending-count">1</strong>
+              </article>
+            </div>
+          </section>
+
+          <section id="orders-module" class="module hidden">
+            <div class="page-heading">
+              <div>
+                <h2>订单模块</h2>
+                <p>查询订单并查看关联工单</p>
+              </div>
+            </div>
+
+            <div class="panel">
+              <div class="toolbar">
+                <label class="grow">
+                  搜索订单
+                  <input id="order-search" aria-label="搜索订单" placeholder="订单号或客户名称">
+                </label>
+                <label>
+                  订单状态
+                  <select id="order-status-filter" aria-label="订单状态">
+                    <option value="ALL">全部</option>
+                    <option value="PAID">已支付</option>
+                    <option value="SHIPPED">已发货</option>
+                    <option value="COMPLETED">已完成</option>
+                  </select>
+                </label>
+                <button id="order-search-button" type="button">查询</button>
+              </div>
+
+              <div id="order-loading" class="loading hidden" role="status">订单查询中...</div>
+
+              <table>
+                <thead>
+                  <tr>
+                    <th>订单号</th>
+                    <th>客户</th>
+                    <th>金额</th>
+                    <th>状态</th>
+                    <th>关联工单</th>
+                  </tr>
+                </thead>
+                <tbody id="order-body"></tbody>
+              </table>
+              <p id="order-empty" class="empty hidden">没有匹配的订单</p>
+            </div>
+          </section>
+
+          <section id="tickets-module" class="module hidden">
+            <div class="page-heading">
+              <div>
+                <h2>工单模块</h2>
+                <p>搜索、筛选并处理工单</p>
+              </div>
+              <button id="create-ticket-button" type="button">新建工单</button>
+            </div>
+
+            <div class="panel">
+              <div class="toolbar">
+                <label class="grow">
+                  搜索工单
+                  <input id="ticket-search" aria-label="搜索工单" placeholder="工单号、订单号或客户名称">
+                </label>
+                <label>
+                  工单状态
+                  <select id="ticket-status-filter" aria-label="工单状态">
+                    <option value="ALL">全部</option>
+                    <option value="PENDING">待处理</option>
+                    <option value="PROCESSING">处理中</option>
+                    <option value="RESOLVED">已解决</option>
+                    <option value="CANCELLED">已取消</option>
+                    <option value="CLOSED">已关闭</option>
+                  </select>
+                </label>
+                <button id="ticket-search-button" type="button">查询</button>
+              </div>
+
+              <div id="ticket-loading" class="loading hidden" role="status">工单查询中...</div>
+
+              <table>
+                <thead>
+                  <tr>
+                    <th>工单号</th>
+                    <th>订单号</th>
+                    <th>客户</th>
+                    <th>类型</th>
+                    <th>当前处理人</th>
+                    <th>状态</th>
+                    <th>操作</th>
+                  </tr>
+                </thead>
+                <tbody id="ticket-body"></tbody>
+              </table>
+              <p id="ticket-empty" class="empty hidden">没有匹配的工单</p>
+            </div>
+          </section>
+        </main>
+      </div>
+    </section>
+  </div>
+
+  <dialog id="ticket-detail-dialog">
+    <div class="dialog-card">
+      <div class="dialog-header">
+        <div>
+          <h2>工单详情</h2>
+          <p id="detail-ticket-id"></p>
+        </div>
+        <button class="icon-button" data-close-dialog="ticket-detail-dialog" type="button">×</button>
+      </div>
+
+      <div class="detail-grid">
+        <div><span>订单号</span><strong id="detail-order-id"></strong></div>
+        <div><span>客户</span><strong id="detail-customer"></strong></div>
+        <div><span>类型</span><strong id="detail-type"></strong></div>
+        <div><span>当前处理人</span><strong id="detail-assignee"></strong></div>
+        <div><span>状态</span><strong id="detail-status"></strong></div>
+      </div>
+
+      <div class="action-grid">
+        <label>
+          分配给
+          <select id="assign-user" aria-label="分配给">
+            <option value="Agent A">Agent A</option>
+            <option value="Agent B">Agent B</option>
+            <option value="Supervisor">Supervisor</option>
+          </select>
+        </label>
+        <button id="assign-button" type="button">分配</button>
+
+        <label>
+          转派给
+          <select id="transfer-user" aria-label="转派给">
+            <option value="Agent B">Agent B</option>
+            <option value="Supervisor">Supervisor</option>
+            <option value="Refund Team">Refund Team</option>
+          </select>
+        </label>
+        <button id="transfer-button" type="button">转派</button>
+
+        <label>
+          状态流转
+          <select id="transition-status" aria-label="状态流转">
+            <option value="PROCESSING">处理中</option>
+            <option value="RESOLVED">已解决</option>
+            <option value="CLOSED">已关闭</option>
+          </select>
+        </label>
+        <button id="transition-button" type="button">更新状态</button>
+      </div>
+
+      <div class="notes-block">
+        <label>
+          添加备注
+          <textarea id="ticket-note" aria-label="添加备注" rows="3" placeholder="请输入处理备注"></textarea>
+        </label>
+        <button id="add-note-button" type="button">添加备注</button>
+        <ul id="note-list"></ul>
+      </div>
+
+      <div class="danger-actions">
+        <button id="cancel-ticket-button" class="warning" type="button">取消工单</button>
+        <button id="close-ticket-button" class="danger" type="button">关闭工单</button>
+      </div>
+
+      <p id="ticket-operation-message" role="status" aria-live="polite"></p>
+    </div>
+  </dialog>
+
+  <dialog id="create-ticket-dialog">
+    <div class="dialog-card">
+      <div class="dialog-header">
+        <h2>新建工单</h2>
+        <button class="icon-button" data-close-dialog="create-ticket-dialog" type="button">×</button>
+      </div>
+
+      <label>
+        关联订单
+        <select id="new-ticket-order" aria-label="关联订单"></select>
+      </label>
+      <label>
+        工单类型
+        <select id="new-ticket-type" aria-label="工单类型">
+          <option value="退款申请">退款申请</option>
+          <option value="物流异常">物流异常</option>
+          <option value="商品问题">商品问题</option>
+          <option value="一般咨询">一般咨询</option>
+        </select>
+      </label>
+      <label>
+        问题描述
+        <textarea id="new-ticket-description" aria-label="问题描述" rows="4"></textarea>
+      </label>
+
+      <button id="save-ticket-button" type="button">创建工单</button>
+      <p id="create-ticket-message" role="status" aria-live="polite"></p>
+    </div>
+  </dialog>
+
+  <div id="toast" class="toast hidden" role="alert"></div>
+  <script src="app.js"></script>
+</body>
+</html>
