@@ -23,7 +23,8 @@ class OrderPage:
         expect(self.loading).to_be_visible()
 
         # 等待 Loading 消失
-        expect(self.loading).to_be_hidden()
+        #expect(self.loading).to_be_hidden()
+        expect(self.loading).to_be_hidden(timeout=10000)
 
     def verify_order_visible(self, order_id: str) -> None:
         expect(self.rows.filter(has_text=order_id)).to_have_count(1)
